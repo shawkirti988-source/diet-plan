@@ -1,0 +1,63 @@
+import streamlit as st
+import google.generativeai as genai
+genai.configure(api_key= st.secrets["GOOGLE_API_KEY"])
+model=genai.GenerativeModel("gemini-2.5-flash")
+
+st.title("Weekly Workout + Diet Planner (Monday - Sunday)")
+
+Gender = st.selectbox("Select gender",
+["Male","Female","Others"])
+
+Age = st.slider("Select your age",13,90,25)
+
+Weight = st.slider("Select your current weight", 40,200,60)
+
+Height  = st.slider("Height (cm)", 120,210,165)
+
+Goal = st.selectbox("Select your fitness goal",
+["Weightgain","weight loss","Muscle gain", "Flexibility", "General fitness"])
+
+Target_Weight=st.slider ("Select your target weight", 20,150,70)
+
+Target_Duration=st.number_input("Enter the target months to acheive target goal")
+
+Diet_preference= st.selectbox("Diet prefference",
+["Vegetarian", "High-Protein", "Non-vegetarian","Balanced diet"])
+
+Time= st.slider("Daily workout time (minutes)", 10,120,45)
+
+level = st.selectbox("Your Fitness Level",
+["Beginner", "Intermediate","Advanced"])
+
+Injury = st.text_input("Any injury or limitation(optional)","")
+
+if st.button("Generate Weekly Plan"):
+     if Target_Duration<1:
+          st.error("Target duration must be atleast 1 month.")
+     else: 
+           with st.spinner("Creating your customised Monday to Sunday Workout and Diet Plan"):
+                         
+                        prompt= f"""
+create a fully 7 day (Monday to Sunday ) fitness and diet plan tailored to the user's details and targets.
+user details:
+- gender:{Gender}
+-age:{Age}
+-Height:{Height}
+-Current_weight:{Weight}
+-Target_weight:{Target_Weight}
+-Target_Duration:{Target_Duration}
+-Primary_goal:{Goal}
+-Diet_prefference:{Diet_preference}
+-Daily_workout_time:{Time}
+-Fitness level:{level}-injuries:{Injury}
+instructions:
+1.begin with short analysis.
+2.foreach day provide day heading,warmup (3 to5 mins) and main workout
+3.for each day includediet section:
+       -breakfast, lunch,snacks, dinner also give portion guidence
+4. provide ashort weekly summary with milestones, safety notes, motivation and quick in home alternatives.
+producea plan now"""
+
+                        response = model.generate_content(prompt)
+                        st.subheader("You custom weekly workout anddiet plan")
+                        st.write(response.text)
